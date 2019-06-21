@@ -1,8 +1,8 @@
 Sub Incidencias(Control As IRibbonControl)
 'Sub Incidencias()
     'Dedicado a mi Señor
-    'Creado por: Hugo Garcia Silva V1.2
-    'Creación:15.10.2018 Modificación:29.03.2019
+    'Creado por: Hugo Garcia Silva
+    'Creación:15.10.2018 Modificación:21.06.2019
     Application.ScreenUpdating = False
     Application.DisplayAlerts = False
     Application.EnableEvents = False
@@ -103,6 +103,10 @@ Private Sub Formato_Incidencia()
     Range("J:J").ColumnWidth = 7
     Range("K:K").ColumnWidth = 7
     Range("L:L").ColumnWidth = 17
+    
+    'Agrego filtro
+    Range("A10:R10").AutoFilter
+    
     'Fin de proceso
     Range("L11").Select
     
@@ -155,7 +159,7 @@ Private Sub Formulas_Incidencias()
 End Sub
 Private Sub Ordeno_Incidencias(ByVal fil As Integer, ByVal col As Integer)
     'Selecciona todo el rango a ordenar
-    Range(Cells(10, 1), Cells(fil, col + 15)).Select
+    Range(Cells(10, 1), Cells(fil, col + 17)).Select
     'Ordena por DIA:
     Selection.Sort Key1:=Range("M10"), Order1:=xlAscending, Header:=xlYes, _
     OrderCustom:=1, MatchCase:=False, Orientation:=xlTopToBottom, DataOption1:=xlSortNormal
