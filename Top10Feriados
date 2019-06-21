@@ -1,7 +1,7 @@
 Sub Top10_Feriados()
     'Dedicado a mi Señor
-    'Creado por: Hugo Garcia Silva V01.0
-    'Creación:15.10.2018 Modificación:24.10.2018
+    'Creado por: Hugo Garcia Silva
+    'Creación:15.10.2018 Modificación:21.06.2019
     Sheets("Trabajadores").Select
 
     Dim x, y As Integer
@@ -69,7 +69,7 @@ Private Sub ObtengoDatosFeriados(ByVal f As Integer)
     'Selecciona todo el rango a ordenar(Columna T=20)
     Range(Cells(1, 1), Cells(NroFila, NroColumna + 19)).Select
     'Ordena por CANTIDAD:
-    Selection.Sort Key1:=Range("R1"), Order1:=xlDescending, Header:=xlYes, _
+    Selection.Sort Key1:=Range("S1"), Order1:=xlDescending, Header:=xlYes, _
     OrderCustom:=1, MatchCase:=False, Orientation:=xlTopToBottom, DataOption1:=xlSortNormal
     
     'Selecciona todo el rango a ordenar(Columna T=20)
@@ -77,7 +77,7 @@ Private Sub ObtengoDatosFeriados(ByVal f As Integer)
     Selection.EntireRow.Delete
     
     'Elimino columnas innecesarias
-    Range("E:G,I:L,R:T").Delete
+    Range("E:G,I:L,N:R,T:U").Delete
     'Muestro las columnas
     Range("G:J").EntireColumn.Hidden = False
     Range("A1").Select
@@ -93,4 +93,3 @@ Private Sub Borra_Top10Feriados()
         End If
     Next i
 End Sub
-
