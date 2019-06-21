@@ -1,0 +1,95 @@
+Sub Top10_HorasExtras()
+    'Dedicado a mi Señor
+    'Creado por: Hugo Garcia Silva V01.0
+    'Creación:15.10.2018 Modificación:24.10.2018
+    Sheets("Trabajadores").Select
+
+    Dim x, y As Integer
+    x = 1
+    y = 1
+    Do While y <= 20
+        If Cells(x, 1).Value = "Código" Then
+            Exit Do
+        Else
+            x = x + 1
+            y = y + 1
+        End If
+    Loop
+
+    'Validacion
+    Cells(x + 1, 1).Select
+    
+    'Declaración de variables de validación
+    Dim a, b As Integer
+    a = 1
+    b = x
+    'Validación de registros
+    Do While a <= 5
+        If Cells(1 + b, 1).Value = "" Then
+            'Cells(1 + b, 1).Select
+            a = a + 1
+            b = b + 1
+        Else
+            Exit Do
+        End If
+    Loop
+    'MsgBox ("El valor de 'valor':" & " es " & b)
+    If (b = x) Then
+        Call Borra_Top10HE
+        Call ObtengoDatosHE(x)
+    Else
+        'No tiene datos
+    End If
+    'Fin del proceso
+    Range("A2").Select
+End Sub
+Private Sub ObtengoDatosHE(ByVal f As Integer)
+    x = f
+    Sheets("Trabajadores").Select
+    'Copio a una nueva hoja
+    Worksheets("Trabajadores").Copy After:=Sheets(Sheets.Count)
+    'Cambio de nombre de hoja
+    Sheets("Trabajadores (2)").Name = "Top10HE"
+    Sheets("Top10HE").Select
+    
+    'Todos los datos a valores
+    Cells.Select
+    Selection.Copy
+    Selection.PasteSpecial Paste:=xlPasteValues
+    
+    'Elimino las filas innecesarias
+    Range(Cells(1, 1), Cells(x - 1, x - 1)).EntireRow.Delete
+    
+    'Obtengo la fila y columna
+    Dim NroFila, NroColumna, Counter As Integer
+    Range("A2").End(xlDown).Select
+    NroFila = ActiveCell.Row
+    NroColumna = ActiveCell.Column
+
+    'Selecciona todo el rango a ordenar(Columna T=20)
+    Range(Cells(1, 1), Cells(NroFila, NroColumna + 19)).Select
+    'Ordena por CANTIDAD:
+    Selection.Sort Key1:=Range("Q1"), Order1:=xlDescending, Header:=xlYes, _
+    OrderCustom:=1, MatchCase:=False, Orientation:=xlTopToBottom, DataOption1:=xlSortNormal
+    
+    'Selecciona todo el rango a ordenar(Columna T=20)
+    Range(Cells(12, 1), Cells(NroFila, NroColumna + 19)).Select
+    Selection.EntireRow.Delete
+    
+    'Elimino columnas innecesarias
+    Range("E:G,I:L,R:T").Delete
+    'Muestro las columnas
+    Range("G:J").EntireColumn.Hidden = False
+    Range("A1").Select
+    End Sub
+Private Sub Borra_Top10HE()
+    On Error Resume Next
+        
+    For i = 1 To Worksheets.Count
+        Sheets("Top10HE").Visible = xlSheetVisible
+        If (Worksheets(i).Name = "Top10HE") Then
+            Sheets("Top10HE").Delete
+            Exit For
+        End If
+    Next i
+End Sub
