@@ -169,4 +169,3 @@ Private Sub Ordeno_Incidencias(ByVal fil As Integer, ByVal col As Integer)
     Selection.Sort Key1:=Range("C10"), Order1:=xlAscending, Header:=xlYes, _
     OrderCustom:=1, MatchCase:=False, Orientation:=xlTopToBottom, DataOption1:=xlSortNormal
 End Sub
-
