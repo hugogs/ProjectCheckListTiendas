@@ -1,8 +1,8 @@
 Sub Reporte(Control As IRibbonControl)
 'Sub ReporteImpresion()
     'Dedicado a mi Señor
-    'Creado por: Hugo Garcia Silva V01.0
-    'Creación:15.10.2018 Modificación:18.10.2018
+    'Creado por: Hugo Garcia Silva
+    'Creación:15.10.2018 Modificación:21.06.2019
     Application.ScreenUpdating = False
     Application.DisplayAlerts = False
     Application.EnableEvents = False
@@ -137,6 +137,9 @@ Private Sub Formato_ReporteImpresion()
     Call Top10_Feriados
     
     Sheets("ReporteImpresion").Select
+    'Agrego filtro
+    Range("A1:Z1").AutoFilter
+    
     Range("F4").Select
     
 End Sub
@@ -194,5 +197,3 @@ Private Sub Ordeno_ReporteImpresion(ByVal fil As Integer, ByVal col As Integer)
     Selection.Sort Key1:=Range("C3"), Order1:=xlAscending, Header:=xlYes, _
     OrderCustom:=1, MatchCase:=False, Orientation:=xlTopToBottom, DataOption1:=xlSortNormal
 End Sub
-
-
