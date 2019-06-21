@@ -1,0 +1,198 @@
+Sub Reporte(Control As IRibbonControl)
+'Sub ReporteImpresion()
+    'Dedicado a mi Señor
+    'Creado por: Hugo Garcia Silva V01.0
+    'Creación:15.10.2018 Modificación:18.10.2018
+    Application.ScreenUpdating = False
+    Application.DisplayAlerts = False
+    Application.EnableEvents = False
+
+    Call Validacion_ReporteImpresion
+    
+    'Guarda los cambios del archivo
+    ActiveWorkbook.Save
+    
+    Application.ScreenUpdating = True
+    Application.DisplayAlerts = True
+    Application.EnableEvents = True
+
+End Sub
+Private Sub Validacion_ReporteImpresion()
+    'Dedicado a mi Señor
+    'Creado por: Hugo Garcia Silva V01.0
+    'Creación:15.10.2018 Modificación:18.10.2018
+    
+    '---REPORTE IMPRESION---
+    Sheets("ReporteImpresion").Visible = xlSheetVisible
+    Sheets("ReporteImpresion").Select
+      
+    'Validacion
+    Range("A4").Select
+    'Declaración de variables de validación
+    Dim a, b As Integer
+    a = 1
+    b = 0
+    'Validación de registros
+    Do While a <= 5
+        If Cells(11 + b, 1).Value = "" Then
+            'Cells(11 + b, 1).Select
+            a = a + 1
+            b = b + 1
+        Else
+            Exit Do
+        End If
+    Loop
+    'MsgBox ("El valor de b:" & " es " & b)
+    If (b = 0) Then
+        Call Formato_ReporteImpresion
+    Else
+        Sheets("ReporteImpresion").Select
+        MsgBox "Hoja 'ReporteImpresion' no contiene datos.", vbOKOnly + vbCritical + vbDefaultButton1, "Productividad"
+    End If
+    '-------Liberar memoria
+    'Set Portapapeles = New MSForms.DataObject
+    'Portapapeles.Clear
+End Sub
+Private Sub Formato_ReporteImpresion()
+    Sheets("ReporteImpresion").Select
+    'Borra borders de toda la hoja
+    Cells.Borders.LineStyle = xlNone
+    'Desactivo lineas de cuadricula
+    ActiveWindow.DisplayGridlines = False
+    'Movilizo los paneles
+    ActiveWindow.FreezePanes = False
+    'Ajuste de zoom
+    ActiveWindow.Zoom = 80
+    'Seleccionar todas las celdas y acomoda
+    Cells.Select
+    Cells.RowHeight = 15
+    Cells.EntireColumn.AutoFit
+    'Inmovilizar los paneles
+    Range("F4").Select
+    ActiveWindow.FreezePanes = True
+    
+    'Mostrar todas las columnas ocultas
+    Columns.EntireColumn.Hidden = False
+    
+    Range("T:T").Copy
+    Range("S:S").PasteSpecial Paste:=xlPasteFormats
+    
+    'Seleciona la ultima fila de la columna A
+    Range("A3").End(xlDown).Select
+    'Obtengo la fila y columna
+    Dim NroFila, NroColumna As Integer
+    NroFila = ActiveCell.Row
+    NroColumna = ActiveCell.Column
+    
+    'Todo los datos
+    With Range(Cells(1, 1), Cells(NroFila, NroColumna + 18))
+        .Font.Size = 9
+        .Font.Name = "Times New Roman"
+        .Borders.Color = RGB(204, 204, 204)
+        .RowHeight = 18
+        .VerticalAlignment = xlCenter
+    End With
+    'Encima del Título
+    With Range(Cells(1, 1), Cells(2, NroColumna + 18))
+        .Font.Color = 0
+        .Interior.Color = RGB(255, 255, 255)
+        .RowHeight = 20
+        .HorizontalAlignment = xlCenter
+    End With
+    'Título
+    With Range(Cells(3, 1), Cells(3, NroColumna + 18))
+        .Font.Color = RGB(255, 255, 255)
+        .Interior.Color = RGB(51, 153, 51)
+        .RowHeight = 40
+        .HorizontalAlignment = xlCenter
+    End With
+    'Datos
+    With Range(Cells(4, 1), Cells(NroFila, NroColumna + 18))
+        .Interior.ColorIndex = 0
+        .Font.Color = RGB(51, 51, 51)
+        '.Borders.Color = RGB(102, 102, 102)
+    End With
+    
+    'Agregar filtro a la fila 10
+    Rows("3:3").AutoFilter
+    'Ancho fijo a columnas
+    Range("A:A").ColumnWidth = 9
+    Range("B:B").ColumnWidth = 15
+    
+    Range("D:D").ColumnWidth = 10
+    Range("E:E").ColumnWidth = 6
+    
+    Range("H:H").ColumnWidth = 12
+    Range("I:I").ColumnWidth = 12
+    Range("J:J").ColumnWidth = 11
+    Range("K:O").ColumnWidth = 15
+    Range("P:R").ColumnWidth = 8
+    
+    Call Formulas_ReporteImpresion(NroFila, NroColumna)
+    Call Ordeno_ReporteImpresion(NroFila, NroColumna)
+    'Oculto columnas
+    Range("S:Y").EntireColumn.Hidden = True
+    
+    Call Top10_HorasExtras
+    Call Top10_Feriados
+    
+    Sheets("ReporteImpresion").Select
+    Range("F4").Select
+    
+End Sub
+Private Sub Formulas_ReporteImpresion(ByVal fi As Integer, ByVal co As Integer)
+    'Formato General
+    Range("S1:Y4").Select
+    Selection.ClearContents
+    Selection.NumberFormat = "General"
+    Range("S3").Select
+    
+    'Agrega formulas
+    Application.Calculation = xlCalculationManual
+    Range("S3").FormulaLocal = "Formato Compensado"
+    Range("S4").Formula = "=IF(C4<>"""",IF(AND(K4<>""-"",L4<>""""),""Compensado"",""""),"""")"
+    
+    Range("T3").FormulaLocal = "Compensado PT"
+    Range("T4").Formula = "=IF(AND(OR(E4=""PT"",E4=""PK""),H4=""HORA EXTRA"",O4=""FALTA IMPRIMIR""),""NO"","""")"
+    
+    Range("U3").FormulaLocal = "Dato"
+    Range("U4").Formula = "=IF(AND(S4=""Compensado"",T4<>""NO""),""Revisar"","""")"
+    
+    Range("V3").FormulaLocal = "Día"
+    Range("V4").Formula = "=IF(I4<>"""",MID(I4,1,2),"""")"
+    
+    Range("W3").FormulaLocal = "Mes"
+    Range("W4").Formula = "=IF(I4<>"""",MID(I4,4,2),"""")"
+    
+    Range("X3").FormulaLocal = "Año"
+    Range("X4").Formula = "=IF(I4<>"""",MID(I4,7,4),"""")"
+    
+    Range("Y3").FormulaLocal = "Código + Tipo"
+    Range("Y4").Formula = "=IF(U4=""Revisar"",CONCATENATE(B4,IF(H4=""HORA EXTRA"",""HE"",IF(H4=""FERIADO"",""F"",""""))),"""")"
+    'Copia fórmulas
+    'Columna Y=25 (co=1 => columnaY=co+24)
+    Range("S4:Y4").Copy Range(Cells(5, 19), Cells(fi, co + 24))
+    
+    Application.Calculation = xlCalculationAutomatic
+    Application.Calculate
+    
+End Sub
+Private Sub Ordeno_ReporteImpresion(ByVal fil As Integer, ByVal col As Integer)
+    'Selecciona todo el rango a ordenar
+    'Columna Y=25 (co=1 => columnaY=co+24)
+    Range(Cells(3, 1), Cells(fil, col + 24)).Select
+    'Ordena por DIA:
+    Selection.Sort Key1:=Range("V3"), Order1:=xlAscending, Header:=xlYes, _
+    OrderCustom:=1, MatchCase:=False, Orientation:=xlTopToBottom, DataOption1:=xlSortNormal
+    'Ordena por MES:
+    Selection.Sort Key1:=Range("W3"), Order1:=xlAscending, Header:=xlYes, _
+    OrderCustom:=1, MatchCase:=False, Orientation:=xlTopToBottom, DataOption1:=xlSortNormal
+    'Ordena por AÑO:
+    Selection.Sort Key1:=Range("X3"), Order1:=xlAscending, Header:=xlYes, _
+    OrderCustom:=1, MatchCase:=False, Orientation:=xlTopToBottom, DataOption1:=xlSortNormal
+    'Ordena por apellido:
+    Selection.Sort Key1:=Range("C3"), Order1:=xlAscending, Header:=xlYes, _
+    OrderCustom:=1, MatchCase:=False, Orientation:=xlTopToBottom, DataOption1:=xlSortNormal
+End Sub
+
+
