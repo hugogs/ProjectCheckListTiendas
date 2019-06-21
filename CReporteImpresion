@@ -138,7 +138,7 @@ Private Sub Formato_ReporteImpresion()
     
     Sheets("ReporteImpresion").Select
     'Agrego filtro
-    Range("A1:Z1").AutoFilter
+    Range("A3:Z3").AutoFilter
     
     Range("F4").Select
     
