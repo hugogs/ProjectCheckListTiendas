@@ -1,0 +1,184 @@
+Sub GRILLA(Control As IRibbonControl)
+'Sub Grilla()
+    'Dedicado a mi Señor
+    'Creado por: Hugo Garcia Silva V01.2
+    'Creación:15.10.2018 Modificación:28.03.2019
+    Application.ScreenUpdating = False
+    Application.DisplayAlerts = False
+    Application.EnableEvents = False
+    
+    Call Validacion_Trabajadores
+    
+    'Guarda los cambios del archivo
+    ActiveWorkbook.Save
+    
+    Application.ScreenUpdating = True
+    Application.DisplayAlerts = True
+    Application.EnableEvents = True
+End Sub
+Private Sub Validacion_Trabajadores()
+    '---TRABAJADORES---
+    'Validación de el título código
+    Sheets("Trabajadores").Visible = xlSheetVisible
+    Sheets("Trabajadores").Select
+    Dim x, y As Integer
+    x = 1
+    y = 1
+    Do While y <= 20
+        If Cells(x, 1).Value = "Código" Then
+            Exit Do
+        Else
+            x = x + 1
+            y = y + 1
+        End If
+    Loop
+
+    'Validacion / Inicio de datos en columna A
+    Cells(x + 1, 1).Select
+    
+    'Declaración de variables de validación
+    Dim a, b As Integer
+    a = 1
+    b = x
+    'Validación de registros/existen datos
+    Do While a <= 5
+        If Cells(1 + b, 1).Value = "" Then
+            'Cells(1 + b, 1).Select
+            a = a + 1
+            b = b + 1
+        Else
+            Exit Do
+        End If
+    Loop
+    'MsgBox ("El valor de 'valor':" & " es " & b)
+    If (b = x) Then
+        Call Formato_Trabajadores(x)
+    Else
+        Sheets("Trabajadores").Select
+        MsgBox "Hoja 'Trabajadores' no contiene datos.", vbOKOnly + vbCritical + vbDefaultButton1, "Visita Tienda Eca"
+    End If
+    '-------Liberar memoria
+    'Set Portapapeles = New MSForms.DataObject
+    'Portapapeles.Clear
+End Sub
+Private Sub Formato_Trabajadores(ByVal x As Integer)
+
+    'Validacion
+    Cells(x + 1, 1).Select
+    
+    ActiveWindow.DisplayGridlines = False
+    'Movilizo los panlees
+    ActiveWindow.FreezePanes = False
+    
+    'Seleciona la ultima fila con datos de la columna A
+    Cells(x + 1, 1).End(xlDown).Select
+    
+    'Obtengo la fila y columna
+    Dim NroFila, NroColumna As Integer
+    NroFila = ActiveCell.Row
+    NroColumna = ActiveCell.Column
+    
+    Cells(x + 1, 1).Select
+    
+    'Todos los datos:
+    'NroColumna = 1
+    'Columna M en la Nro 13
+    'NroColumna + 12 = Columna M
+    With Range(Cells(x, 1), Cells(NroFila, NroColumna + 12))
+        .Font.Size = 9
+        .Font.Name = "Times New Roman"
+        '.Borders.Color = RGB(204, 204, 204)
+        .RowHeight = 18
+        .VerticalAlignment = xlCenter
+    End With
+    
+    'Título en base al dato de "x"
+    Range(Cells(1, 1), Cells(x, NroColumna + 12)).RowHeight = 15
+
+    'Alto de fila y oculto fila
+    Rows(4).RowHeight = 5
+    
+    'Rows("5:5").EntireRow.Hidden = True
+    
+    'Agrego filtro
+    Range(Cells(x, 1), Cells(x, NroColumna + 12)).AutoFilter
+    
+    'Inmovilizo paneles
+    Cells(x + 1, 8).Select
+    ActiveWindow.FreezePanes = True
+    
+    'Ajuste de zoom
+    ActiveWindow.Zoom = 80
+    'Seleccion de todas las celdas
+    Cells.Select
+    'Autoajuste de celdas
+    Cells.EntireColumn.AutoFit
+    
+    
+    'Selecciona todo el rango a ordenar
+    Range(Cells(x, 1), Cells(NroFila, NroColumna + 12)).Select
+    
+    'Ordena por apellido:
+    Selection.Sort Key1:=Range("D1"), Order1:=xlAscending, Header:=xlYes, _
+    OrderCustom:=1, MatchCase:=False, Orientation:=xlTopToBottom, DataOption1:=xlSortNormal
+    
+    'x=nro de fila despues del titulo
+    Call Formulas_Trabajadores(x, NroFila, NroColumna)
+    
+    'Oculto columnas
+    Range("E:G,I:I,N:U").EntireColumn.Hidden = True
+    Range("A1").Select
+    
+End Sub
+Private Sub Formulas_Trabajadores(ByVal df As Integer, ByVal f As Integer, ByVal c As Integer)
+    'Datos a asignar
+    datoFila = df
+    NroFila = f
+    NroColumna = c
+    
+    'Datos:
+    'NroColumna = 1
+    'Columna N = 14
+    'NroColumna + 13 = Columna N
+    'Columna T = 20
+    'NroColumna + 19 = Columna T
+    
+    'datos a agregar
+    Range(Cells(1, NroColumna + 13), Cells(datoFila + 1, NroColumna + 19)).ColumnWidth = 6
+       
+    '---Agrego formulas
+    Range(Cells(1, NroColumna + 13), Cells(datoFila + 1, NroColumna + 19)).Select
+    Selection.ClearContents
+    Selection.NumberFormat = "General"
+    
+    'Agrego formulas
+    Application.Calculation = xlCalculationManual
+        
+    Range("N5").Formula = "Tard."
+    Range("N6").Formula = "=IF(A6<>"""",SUMIF(Incidencias!A:P,A6,Incidencias!P:P),"""")"
+    
+    Range("O5").Formula = "T Tard."
+    Range("O6").Formula = "=IF(A6<>"""",SUMIF(Incidencias!A:Q,A6,Incidencias!Q:Q),"""")"
+    
+    Range("P5").Formula = "T Inas."
+    Range("P6").Formula = "=IF(A6<>"""",SUMIF(Incidencias!A:R,A6,Incidencias!R:R),"""")"
+    
+    Range("Q5").Formula = "TOTAL"
+    Range("Q6").Formula = "=SUM(N6:P6)"
+    
+    Range("R5").Formula = "Conteo HE"
+    Range("R6").Formula = "=IF(A6<>"""",COUNTIF(ReporteImpresion!$Y:$Y,CONCATENATE(Trabajadores!A6,""HE"")))"
+    
+    Range("S5").Formula = "Conteo F"
+    Range("S6").Formula = "=IF(A6<>"""",COUNTIF(ReporteImpresion!$Y:$Y,CONCATENATE(Trabajadores!A6,""F"")))"
+    
+    Range("T5").Formula = "TOTAL"
+    Range("T6").Formula = "=SUM(R6:S6)"
+    
+    'COLUMNA U=1 (C=1 => columna U = c+20)CORREGIR
+    'Columna O=15
+    Range(Cells(datoFila + 1, NroColumna + 13), Cells(datoFila + 1, NroColumna + 19)).Copy Range(Cells(datoFila + 1, NroColumna + 13), Cells(NroFila, NroColumna + 19))
+    
+    Application.Calculation = xlCalculationAutomatic
+    Application.Calculate
+End Sub
