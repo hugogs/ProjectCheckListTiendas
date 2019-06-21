@@ -1,0 +1,172 @@
+Sub Incidencias(Control As IRibbonControl)
+'Sub Incidencias()
+    'Dedicado a mi Señor
+    'Creado por: Hugo Garcia Silva V1.2
+    'Creación:15.10.2018 Modificación:29.03.2019
+    Application.ScreenUpdating = False
+    Application.DisplayAlerts = False
+    Application.EnableEvents = False
+
+    Call Validacion_Incidencias
+    
+    'Guarda los cambios del archivo
+    ActiveWorkbook.Save
+    
+    Application.ScreenUpdating = True
+    Application.DisplayAlerts = True
+    Application.EnableEvents = True
+
+End Sub
+Private Sub Validacion_Incidencias()
+    
+    '---INCIDENCIAS---
+    Sheets("Incidencias").Visible = xlSheetVisible
+    Sheets("Incidencias").Select
+    
+    'Validacion
+    Range("A11").Select
+    'Declaración de variables de validación
+    Dim a, b As Integer
+    a = 1
+    b = 0
+    'Validación de registros
+    Do While a <= 5
+        If Cells(11 + b, 1).Value = "" Then
+            'Cells(11 + b, 1).Select
+            a = a + 1
+            b = b + 1
+        Else
+            Exit Do
+        End If
+    Loop
+    'MsgBox ("El valor de b:" & " es " & b)
+    If (b = 0) Then
+        Call Formato_Incidencia
+    Else
+        Sheets("Incidencias").Select
+        MsgBox "Hoja 'Incidencias' no contiene datos.", vbOKOnly + vbCritical + vbDefaultButton1, "Productividad"
+    End If
+    '-------Liberar memoria
+    'Set Portapapeles = New MSForms.DataObject
+    'Portapapeles.Clear
+End Sub
+Private Sub Formato_Incidencia()
+    Sheets("Incidencias").Select
+    'Movilizo los panlees
+    ActiveWindow.FreezePanes = False
+    'Agregar filtro a la fila 10
+    Rows("10:10").AutoFilter
+    'Seleccionar todas las celdas y acomoda
+    Cells.Select
+    Cells.RowHeight = 15
+    Cells.EntireColumn.AutoFit
+
+    'Ocultar la fila 8, alto a fila 9 y alto fila 10
+    Rows("8:8").EntireRow.Hidden = True
+    Rows(9).RowHeight = 5
+    Rows(10).RowHeight = 24.75
+    'Agregar filtro a la fila 10
+    Rows("10:10").AutoFilter
+    'Inmovilizar los paneles
+    Rows("11:11").Select
+    ActiveWindow.FreezePanes = True
+    'Activar el Zoom de la hoja
+    ActiveWindow.Zoom = 80
+    'Declaro variables para obtener Nro fila y columna
+    Dim NroFila, NroColumna As Integer
+    'Obtengo la fila y columna
+    Range("A10").End(xlDown).Select
+    NroFila = ActiveCell.Row
+    NroColumna = ActiveCell.Column
+    'Declaro variable para almacenar la cantidad de datos
+    Dim Conteo As Integer
+    'Obtengo la cantidad de datos
+    Conteo = Range(Cells(10, 1), Cells(NroFila, NroColumna)).Count
+    'Declaro variable para bucle
+    Dim i As Integer
+    Range("L11").Select
+    ActiveCell.Select
+    For i = 1 To Conteo
+        If ActiveCell.Value = "Ausencia" Or ActiveCell.Value = "Ent. Atrasada" Or ActiveCell.Value = "Refrigerio Largo" Then
+            ActiveCell.Offset(1, 0).Select
+        Else
+            Selection.EntireRow.Delete
+        End If
+    Next i
+    'Ancho fijo a columnas
+    Range("A:A").ColumnWidth = 14
+    Range("B:B").ColumnWidth = 10
+    Range("D:D").ColumnWidth = 7.3
+    Range("G:G").ColumnWidth = 12
+    Range("H:H").ColumnWidth = 8
+    Range("I:I").ColumnWidth = 7
+    Range("J:J").ColumnWidth = 7
+    Range("K:K").ColumnWidth = 7
+    Range("L:L").ColumnWidth = 17
+    'Fin de proceso
+    Range("L11").Select
+    
+    Call Formulas_Incidencias
+    
+    'Oculto columnas
+    Range("M:R").EntireColumn.Hidden = True
+    
+End Sub
+Private Sub Formulas_Incidencias()
+    'Declaro variables para obtener Nro fila y columna
+    Dim NroFila, NroColumna As Integer
+    'Obtengo la fila y columna
+    Range("A10").End(xlDown).Select
+    NroFila = ActiveCell.Row
+    NroColumna = ActiveCell.Column
+    
+    'Agrega formulas
+    Application.Calculation = xlCalculationManual
+    
+    Range("M10").Formula = "Día"
+    Range("M11").Formula = "=IF(G11<>"""",MID(G11,1,2),"""")"
+    
+    Range("N10").Formula = "Mes"
+    Range("N11").Formula = "=IF(G11<>"""",MID(G11,4,2),"""")"
+    
+    Range("O10").Formula = "Año"
+    Range("O11").Formula = "=IF(G11<>"""",MID(G11,7,4),"""")"
+    
+    Range("P10").Formula = "Tard."
+    Range("P11").Formula = "=IF(AND(G11<>"""",L11=""Ent. Atrasada""),ROUND(K11*24,2),"""")"
+    
+    Range("Q10").Formula = "Nro.Tard."
+    Range("Q11").Formula = "=IF(AND(G11<>"""",L11=""Ent. Atrasada""),1,"""")"
+    
+    Range("R10").Formula = "Inas."
+    Range("R11").Formula = "=IF(AND(G11<>"""",L11=""Ausencia""),IF(D11=""FT"",8,IF(D11=""P23"",4,IF(D11=""JV"",6.5,IF(D11=""P19:45"",7,0)))),"""")"
+    
+    'Copia fórmulas
+    Range("M11:R11").Copy Range(Cells(12, 13), Cells(NroFila, NroColumna + 17))
+    
+    Application.Calculation = xlCalculationAutomatic
+    Application.Calculate
+    
+    Call Ordeno_Incidencias(NroFila, NroColumna)
+    Call Top10_Incidencias
+    
+    Sheets("Incidencias").Select
+    Range("L11").Select
+End Sub
+Private Sub Ordeno_Incidencias(ByVal fil As Integer, ByVal col As Integer)
+    'Selecciona todo el rango a ordenar
+    Range(Cells(10, 1), Cells(fil, col + 15)).Select
+    'Ordena por DIA:
+    Selection.Sort Key1:=Range("M10"), Order1:=xlAscending, Header:=xlYes, _
+    OrderCustom:=1, MatchCase:=False, Orientation:=xlTopToBottom, DataOption1:=xlSortNormal
+    'Ordena por MES:
+    Selection.Sort Key1:=Range("N10"), Order1:=xlAscending, Header:=xlYes, _
+    OrderCustom:=1, MatchCase:=False, Orientation:=xlTopToBottom, DataOption1:=xlSortNormal
+    'Ordena por AÑO:
+    Selection.Sort Key1:=Range("O10"), Order1:=xlAscending, Header:=xlYes, _
+    OrderCustom:=1, MatchCase:=False, Orientation:=xlTopToBottom, DataOption1:=xlSortNormal
+    'Ordena por apellido:
+    Selection.Sort Key1:=Range("C10"), Order1:=xlAscending, Header:=xlYes, _
+    OrderCustom:=1, MatchCase:=False, Orientation:=xlTopToBottom, DataOption1:=xlSortNormal
+End Sub
+
