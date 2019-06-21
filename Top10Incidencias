@@ -1,7 +1,7 @@
 Sub Top10_Incidencias()
     'Dedicado a mi Señor
-    'Creado por: Hugo Garcia Silva V01.0
-    'Creación:15.10.2018 Modificación:24.10.2018
+    'Creado por: Hugo Garcia Silva
+    'Creación:15.10.2018 Modificación:21.06.2019
     Sheets("Trabajadores").Select
 
     Dim x, y As Integer
