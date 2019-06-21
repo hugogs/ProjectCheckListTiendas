@@ -1,8 +1,8 @@
 Sub GRILLA(Control As IRibbonControl)
 'Sub Grilla()
     'Dedicado a mi Señor
-    'Creado por: Hugo Garcia Silva V01.2
-    'Creación:15.10.2018 Modificación:28.03.2019
+    'Creado por: Hugo Garcia Silva
+    'Creación:15.10.2018 Modificación:21.06.2019
     Application.ScreenUpdating = False
     Application.DisplayAlerts = False
     Application.EnableEvents = False
